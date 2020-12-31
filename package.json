@@ -1,0 +1,29 @@
+{
+  "name": "iconfont-updater",
+  "description": "一个用于更新项目内iconfont的库",
+  "version": "1.0.4",
+  "main": "index.js",
+  "author": "chenyanfei",
+  "bin": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "iconfont",
+    "update"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/chenyanfei-m/iconfont-updater"
+  },
+  "homepage": "https://github.com/chenyanfei-m/iconfont-updater#readme",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "adm-zip": "^0.5.1",
+    "minimatch": "^3.0.4",
+    "ora": "^5.2.0",
+    "request": "^2.88.2",
+    "shortid": "^2.2.16"
+  }
+}
