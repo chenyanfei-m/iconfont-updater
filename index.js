@@ -16,7 +16,13 @@ const getConfig = async () => {
         configFilePath,
         { encoding: 'utf-8' }
     )
-    return JSON.parse(configFile)
+
+    const externalConfig = JSON.parse(configFile)
+
+    return {
+        ...externalConfig,
+        dirname: externalConfig.dirname || '.',
+    }
 }
 
 const requestFile = async ({ downloadUrl, dirname, cookie }) => {

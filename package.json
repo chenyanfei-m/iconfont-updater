@@ -1,7 +1,7 @@
 {
   "name": "iconfont-updater",
   "description": "一个用于更新项目内iconfont的库",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "index.js",
   "author": "chenyanfei",
   "bin": "index.js",

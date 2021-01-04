@@ -19,14 +19,16 @@
 ```
 {
     // 保存到项目的哪个文件夹下
+    // 默认项目根目录
     "dirname": "./static/iconfont",
-    // 点击下载至本地时get请求携带的cookie
-    "cookie": "",
     // 点击下载至本地时get请求的url
     "downloadUrl": "",
+    // 点击下载至本地时get请求携带的cookie
+    "cookie": "",
     // glob 匹配
     // 由于下载下来的zip解压是一个文件夹所以加**
     // 有些时候我们只需要某种类型的文件，比如我用symbol只需要js文件
+    // 默认所有类型文件
     "includes": ["**/*.js"]
 }
 ```
@@ -44,7 +46,6 @@
 ```
 
 然后 `yarn run update:iconfont` 或 `npm run update:iconfont`
-
 
 ### cookie和downloadUrl的获取
 
