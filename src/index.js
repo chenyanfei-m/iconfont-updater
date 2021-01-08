@@ -7,6 +7,8 @@ const axios = require('axios');
 const cookie = require('cookie')
 const AdmZip = require('adm-zip')
 const minimatch = require('minimatch')
+const { get } = require('lodash')
+const dayjs = require('dayjs')
 
 const CWD = process.cwd();
 const spinner = ora();
@@ -19,19 +21,17 @@ const GITHUB_PASSWORD = 'githubPassword';
 const ICON_PROJECT_ID = 'iconProjectId';
 
 // TODO: 将所有流程接口化
-async function updateIconfontMain() {
+async function run() {
   const userConfig = await getUserConfig();
   spinner.start('正在初始化');
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   spinner.succeed('初始化完毕');
   try {
-    await gotoIconfontHome(page);
-    await loginOfGithub(page);
-    await authOfGithub(page);
-    await gotoIconfontMyProjects(page);
+    await gotoHomepage(page);
+    await loginToGithub(page);
     await settingAxios(page);
-    await updateSelectedProjectId();
+    await updateProjectId();
     await downloadProjectSource(userConfig);
   } catch (e) {
     spinner.stop();
@@ -81,6 +81,7 @@ async function getSerializedCookies(cookies) {
 }
 
 async function settingAxios(page) {
+  spinner.succeed('Github 授权完毕')
   const cookies = await getCookies(page)
   const ctoken = cookies.find(ele => ele.name === 'ctoken').value
   const defaultParams = {
@@ -116,6 +117,14 @@ async function getProjects() {
   return corpProjects
 }
 
+async function getProjectDetail(pid) {
+  const projectDetailPath = '/api/project/detail.json'
+  const { data: { data: { project } } } = await axios.get(projectDetailPath, {
+    params: { pid }
+  })
+  return project
+}
+
 async function downloadZipFile(projectId) {
   const downloadPath = '/api/project/download.zip'
   const { data } = await axios.get(downloadPath, {
@@ -125,32 +134,30 @@ async function downloadZipFile(projectId) {
   return data
 }
 
-async function gotoIconfontHome(page) {
+async function gotoHomepage(page) {
   spinner.start('访问 iconfont 主页');
-  await page.goto('https://www.iconfont.cn/', { waitUntil: 'networkidle0' });
-  const loginEle = await page.$('.signin');
-  await loginEle.click();
-  const loginGithubEle = await page.waitForSelector(
-    'a[href^="/api/login/github"]',
-    { visible: true }
-  );
+  await page.goto('https://www.iconfont.cn/', { waitUntil: 'domcontentloaded' });
   spinner.succeed('iconfont 主页加载完毕');
-  await loginGithubEle.click();
+  await page.evaluate(() => location.href = '/api/login/github')
 }
 
-async function loginOfGithub(page) {
-  spinner.start('访问 GitHub 登录页面');
-  await page.waitForNavigation({ waitUntil: 'networkidle0' });
+async function loginToGithub(page, isRetry = false) {
+  if (isRetry) {
+    spinner.fail('登录失败，请重试')
+  } else {
+    spinner.start('正在加载 GitHub 登录页')
+    await page.waitForNavigation({ waitUntil: 'domcontentloaded' });
+    spinner.succeed('GitHub 登录页已加载')
+  }
   const loginFieldOfGithub = await page.waitForSelector('#login_field');
-  spinner.succeed('GitHub 登录页面加载完毕');
   let account = config.get(GITHUB_ACCOUNT);
   let password = config.get(GITHUB_PASSWORD);
 
-  if (account == null) {
+  if (typeof account !== 'string') {
     const githubAccountInput = await inquirer.prompt({
       type: 'input',
       name: 'githubAccount',
-      message: '请输入 Github 账号名称：'
+      message: '请输入 GitHub 用户名或邮箱地址：',
     });
     const githubPasswordInput = await inquirer.prompt({
       type: 'password',
@@ -163,50 +170,47 @@ async function loginOfGithub(page) {
     config.set(GITHUB_PASSWORD, password);
   }
 
+  if (isRetry) {
+    await page.evaluate(ele => ele.value = '', loginFieldOfGithub)
+  }
   await loginFieldOfGithub.type(account);
   const passwordFieldOfGithub = await page.$('#password');
+
   await passwordFieldOfGithub.type(password);
   const submitOfGithub = await page.$('input[type="submit"]');
   await submitOfGithub.click();
-}
 
-async function authOfGithub(page) {
-  spinner.start('GitHub 正在授权');
-  const isNeedAuth = async page => {
-    let ret = true;
+  /**
+   * 分为三种情况
+   * 1. 登录失败，跳登录页
+   * 2. 需要手动授权，跳授权页
+   * 3. 登录成功，跳iconfont主页
+   */
+  spinner.start('加载中，请稍候')
+  page.waitForNavigation({ waitUntil: 'domcontentloaded' });
 
-    await page.waitForNavigation({ waitUntil: 'networkidle0' });
-    try {
-      await page.waitForSelector('#js-oauth-authorize-btn', { timeout: 3000 });
-    } catch {
-      ret = false;
+  const result = await Promise.race([
+    page.waitForSelector('#login_field'),
+    page.waitForSelector('#js-oauth-authorize-btn:enabled'),
+    page.waitForFunction(() => location.href.includes('//www.iconfont.cn'))
+  ])
+  if (get(result, 'constructor.name') === 'ElementHandle') {
+    const id = await page.evaluate((ele) => ele.id, result)
+    if (id === 'login_field') {
+      clearSettings(false)
+      await loginToGithub(page, true)
+      return
+    } else {
+      result.click()
+      await page.waitForFunction(() => location.href.includes('//www.iconfont.cn'))
     }
-
-    return ret;
-  };
-
-  if (await isNeedAuth(page)) {
-    const authBtn = await page.waitForSelector(
-      '#js-oauth-authorize-btn:enabled'
-    );
-    await authBtn.click();
   }
-
-  spinner.succeed('GitHub 授权完毕');
 }
 
-async function gotoIconfontMyProjects(page) {
-  spinner.start('正在加载项目列表');
-  await page.waitForSelector('a[href="/manage/index"]', { visible: true });
-  await page.goto(
-    'https://www.iconfont.cn/manage/index?manage_type=myprojects',
-    { waitUntil: 'networkidle0' }
-  );
-}
-
-async function updateSelectedProjectId() {
-  spinner.succeed('项目列表加载完毕');
+async function updateProjectId() {
+  spinner.start('开始加载项目列表')
   const projects = await getProjects()
+  spinner.succeed('项目列表加载完毕');
 
   const selectedProjectId = config.get(ICON_PROJECT_ID);
   const iconProjectIsExist = projects.some(ele => ele.id === selectedProjectId)
@@ -232,9 +236,13 @@ async function updateSelectedProjectId() {
 }
 
 async function downloadProjectSource({ output, includes }) {
+  const selectedProjectId = config.get(ICON_PROJECT_ID);
+
+  const { update_at, name } = await getProjectDetail(selectedProjectId)
+  ora().info(`项目 ${name} 最后更新时间为 ${dayjs(update_at).format('YYYY-MM-DD HH:mm:ss')}`)
+
   spinner.start('正在下载文件...')
 
-  const selectedProjectId = config.get(ICON_PROJECT_ID);
   const finalOutputPath = path.resolve(CWD, output)
   const fileBuffer = await downloadZipFile(selectedProjectId)
 
@@ -250,12 +258,12 @@ async function downloadProjectSource({ output, includes }) {
   spinner.succeed('下载完成')
 }
 
-function clearSettings() {
+function clearSettings(showLog = true) {
   config.clear();
-  ora().succeed('配置已清除')
+  showLog && ora().succeed('配置已清除')
 }
 
 module.exports = {
-  updateIconfontMain,
+  run,
   clearSettings
 };

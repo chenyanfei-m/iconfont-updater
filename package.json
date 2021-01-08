@@ -1,14 +1,15 @@
 {
   "name": "iconfont-updater",
   "description": "一个用于更新项目内 iconfont 的库",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "license": "MIT",
   "main": "./bin/cli.js",
   "bin": {
     "iconfont-updater": "./bin/cli.js"
   },
   "scripts": {
-    "run": "node ./bin/cli.js --trace"
+    "run": "node ./bin/cli.js",
+    "clear": "node ./bin/cli.js --clear"
   },
   "keywords": [
     "iconfont"
@@ -27,6 +28,7 @@
     "cookie": "^0.4.1",
     "dayjs": "^1.10.2",
     "inquirer": "^7.1.0",
+    "lodash": "^4.17.20",
     "minimatch": "^3.0.4",
     "ora": "^4.0.3",
     "puppeteer": "^2.1.1"
