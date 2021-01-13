@@ -141,6 +141,10 @@ async function gotoHomepage(page) {
   await page.evaluate(() => location.href = '/api/login/github')
 }
 
+async function waitForNavigationToHome(page) {
+  return await page.waitForFunction(() => location.hostname === 'www.iconfont.cn' && location.pathname === '/')
+}
+
 async function loginToGithub(page, isRetry = false) {
   if (isRetry) {
     spinner.fail('登录失败，请重试')
@@ -192,7 +196,7 @@ async function loginToGithub(page, isRetry = false) {
   const result = await Promise.race([
     page.waitForSelector('#login_field'),
     page.waitForSelector('#js-oauth-authorize-btn:enabled'),
-    page.waitForFunction(() => location.href.includes('//www.iconfont.cn'))
+    waitForNavigationToHome(page),
   ])
   if (get(result, 'constructor.name') === 'ElementHandle') {
     const id = await page.evaluate((ele) => ele.id, result)
@@ -202,7 +206,7 @@ async function loginToGithub(page, isRetry = false) {
       return
     } else {
       result.click()
-      await page.waitForFunction(() => location.href.includes('//www.iconfont.cn'))
+      await waitForNavigationToHome(page)
     }
   }
 }
@@ -238,8 +242,8 @@ async function updateProjectId() {
 async function downloadProjectSource({ output, includes }) {
   const selectedProjectId = config.get(ICON_PROJECT_ID);
 
-  const { update_at, name } = await getProjectDetail(selectedProjectId)
-  ora().info(`项目 ${name} 最后更新时间为 ${dayjs(update_at).format('YYYY-MM-DD HH:mm:ss')}`)
+  const { updated_at, name } = await getProjectDetail(selectedProjectId)
+  ora().info(`项目 ${name} 最后更新时间为 ${dayjs(updated_at).format('YYYY-MM-DD HH:mm:ss')}`)
 
   spinner.start('正在下载文件...')
 
