@@ -1,7 +1,7 @@
 {
   "name": "iconfont-updater",
   "description": "一个用于更新项目内 iconfont 的库",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "license": "MIT",
   "main": "./bin/cli.js",
   "bin": {
@@ -22,10 +22,8 @@
   "homepage": "https://github.com/chenyanfei-m/iconfont-updater#readme",
   "dependencies": {
     "adm-zip": "^0.5.1",
-    "axios": "^0.21.1",
     "commander": "^5.0.0",
     "configstore": "^5.0.1",
-    "cookie": "^0.4.1",
     "dayjs": "^1.10.2",
     "inquirer": "^7.1.0",
     "lodash": "^4.17.20",
