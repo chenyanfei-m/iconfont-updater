@@ -123,9 +123,9 @@ class IconfontUpdater {
   }
 
   async gotoHomepage() {
-    spinner.start('访问 iconfont 主页');
+    spinner.start('访问 Iconfont 主页');
     await this.page.goto('https://www.iconfont.cn/', { waitUntil: 'domcontentloaded' });
-    spinner.succeed('iconfont 主页加载完毕');
+    spinner.succeed('Iconfont 主页加载完毕');
     await this.page.evaluate(() => location.href = '/api/login/github')
   }
 
@@ -139,7 +139,7 @@ class IconfontUpdater {
     } else {
       spinner.start('正在加载 GitHub 登录页')
       await this.page.waitForNavigation({ waitUntil: 'domcontentloaded' });
-      spinner.succeed('GitHub 登录页已加载')
+      spinner.succeed('GitHub 登录页加载完毕')
     }
     const loginFieldOfGithub = await this.page.waitForSelector('#login_field');
     let account = config.get(GITHUB_ACCOUNT);
@@ -210,8 +210,8 @@ class IconfontUpdater {
     if (iconProjectIsExist) return
 
     const message = selectedProjectId && !iconProjectIsExist
-      ? '项目不存在，请重新选择 iconfont 项目：'
-      : '请选择 iconfont 项目：'
+      ? '项目不存在，请重新选择 Iconfont 项目：'
+      : '请选择 Iconfont 项目：'
 
     const iconProjectInput = await inquirer.prompt({
       type: 'list',

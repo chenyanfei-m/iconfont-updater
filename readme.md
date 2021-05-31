@@ -48,6 +48,9 @@
 
 如需清除保存的配置，请执行 `yarn iconfont-updater --clear`
 
+### 常见的问题
+
+最常见的问题是由于Github超时导致代码抛出错误，对于此情况，请科学切换网络环境
 ## 感谢
 
 此项目基于[mp-iconfont-cli](https://github.com/deepfunc/mp-iconfont-cli)，在此表示感谢
