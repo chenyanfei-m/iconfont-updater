@@ -130,7 +130,9 @@ class IconfontUpdater {
   }
 
   async waitForNavigationToHome() {
-    return await this.page.waitForFunction(() => location.hostname === 'www.iconfont.cn' && location.pathname === '/')
+    // return await this.page.waitForFunction(() => location.hostname === 'www.iconfont.cn' && location.pathname === '/')
+    // 避免填手机号造成的报错
+    return await this.page.waitForFunction(() => location.hostname === 'www.iconfont.cn')
   }
 
   async loginToGithub(isRetry = false) {
