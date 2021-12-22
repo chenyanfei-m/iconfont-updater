@@ -5,6 +5,13 @@ node_modules
 # OSX
 .DS_Store
 
-.iconfontrc.json
 
-yarn.lock
+# yarn.lock
+
+# ignore test file
+.iconfontrc.json
+iconfont
+
+.vscode
+
+yarn-error.log

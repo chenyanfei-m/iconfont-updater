@@ -14,8 +14,8 @@ if (program.clear) {
   clearSettings();
 } else {
   new IconfontUpdater().run().catch(err => {
-    spinner.clear();
     spinner.fail('发生错误，请重试');
-    console.error(err);
+    console.log(err)
+    process.exit()
   });
 }

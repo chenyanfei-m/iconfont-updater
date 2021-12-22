@@ -18,8 +18,7 @@
 
 ```
 {
-    // 保存到项目的哪个文件夹下
-    // 默认项目根目录
+    // 保存到项目的哪个文件夹下，默认项目根目录
     "output": "./static/iconfont",
 
     // glob 匹配
@@ -30,7 +29,7 @@
 }
 ```
 
-在项目根目录执行 `yarn iconfont-updater`，之后进入`github`登录和选择`iconfont`项目的流程
+在项目根目录执行 `yarn iconfont-updater`，之后弹出网页进入`github`登录流程，登录完成后回到命令行选择`iconfont`项目
 
 更常见的情况是搭配`package.json`中的`scripts`使用：
 
@@ -38,7 +37,7 @@
 
 ```
 {
-    "update:iconfont": "iconfont-updater"
+    "update:icon": "iconfont-updater"
 }
 ```
 
@@ -50,7 +49,8 @@
 
 ### 常见的问题
 
-最常见的问题是由于Github超时导致代码抛出错误，对于此情况，请科学切换网络环境
+- 如果`puppeteer`下载缓慢，可以添加`puppeteer_download_host "https://npm.taobao.org/mirrors/"`到`.yarnrc`中
+
 ## 感谢
 
 此项目基于[mp-iconfont-cli](https://github.com/deepfunc/mp-iconfont-cli)，在此表示感谢
