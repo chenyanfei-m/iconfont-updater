@@ -141,7 +141,7 @@ class IconfontUpdater {
           // 停止page load，防止重定向丢失alert的执行上下文
           await this.page._client.send('Page.stopLoading')
           // 只取cookie真正的值，其他的去掉
-          resolve(data._headers['set-cookie'].match(/^.+?;/)?.[0])
+          resolve(data._headers['set-cookie'].match(/EGG_SESS_ICONFONT=.+?;/)?.[0])
         }
       })
       // TODO: 关闭浏览器自动退出程序
