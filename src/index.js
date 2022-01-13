@@ -115,7 +115,7 @@ class IconfontUpdater {
     await this.page.goto(ORIGIN, {
       waitUntil: 'domcontentloaded',
     })
-    await this.page.evaluate(() => (location.href = '/api/login/github'))
+    await this.page.evaluate(() => (location.href = '/login'))
   }
 
   async initBrowserAndPage() {
@@ -131,13 +131,18 @@ class IconfontUpdater {
   }
 
   async waitLogin() {
-    spinner.start('等待登录完成')
+    spinner.start('等待登录完成（可以使用手机号或Github登录')
     await this.gotoLoginPage()
     const cookie = await new Promise((resolve, reject) => {
       this.page.on('response', async (data) => {
-        const loginCbUrl = `${ORIGIN}/api/login/github/callback`
-        // 如果有302的回跳iconfont.cn代表登录成功
-        if (data._status === 302 && data?._url.startsWith(loginCbUrl)) {
+        const githubLoginCbUrl = `${ORIGIN}/api/login/github/callback`
+        const githubSucceed = data._status === 302 && data?._url.startsWith(githubLoginCbUrl)
+
+        const iconfontLoginUrl = 'https://www.iconfont.cn/api/account/login.json'
+        const iconfontSucceed = data?._url === iconfontLoginUrl
+
+        // 监听官方登录和github登录
+        if (iconfontSucceed || githubSucceed) {
           // 停止page load，防止重定向丢失alert的执行上下文
           await this.page._client.send('Page.stopLoading')
           // 只取cookie真正的值，其他的去掉
