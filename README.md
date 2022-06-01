@@ -29,7 +29,7 @@
 }
 ```
 
-在项目根目录执行 `yarn iconfont-updater`，之后弹出网页进入`github`登录流程，登录完成后回到命令行选择`iconfont`项目
+在项目根目录执行 `yarn iconfont-updater`，之后弹出网页进入登录流程（支持github登录和iconfont登录），完成后回到命令行选择`iconfont`项目
 
 更常见的情况是搭配`package.json`中的`scripts`使用：
 
@@ -41,7 +41,7 @@
 }
 ```
 
-然后 `yarn run update:iconfont`
+然后 `yarn run update:icon`
 
 ### 清除配置
 
